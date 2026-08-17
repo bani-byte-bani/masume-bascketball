@@ -199,7 +199,7 @@ button:active{transform:translateY(1px)}
     <button class="ghost" id="btnReset">最初から</button>
   </div>
 
-  <div class="updated">修正日時：2026年8月17日 15:32（JST）</div>
+  <div class="updated">修正日時：2026年8月17日 16:05（JST）</div>
 </div>
 
 <div class="mask" id="mask"><div class="modal">
@@ -325,9 +325,14 @@ function clearLine(a,b){
   }
   return true;
 }
+// ブロックできる守備の位置：ボール保持者のゴール側3マス＋真横2マス（後ろは数えない）
+function isBlockCell(r,c,p){
+  if(r===p.r+1&&Math.abs(c-p.c)<=1) return true;   // ゴール側の3マス
+  if(r===p.r&&Math.abs(c-p.c)===1) return true;    // 真横の2マス
+  return false;
+}
 function adjDefenders(p){
-  // ジャンケンの対象は、ボール保持者より1行ゴール側にいる守備だけ（横・後ろは数えない）
-  return S.pieces.filter(q=>q.team===def()&&q.r===p.r+1&&Math.abs(q.c-p.c)<=1);
+  return S.pieces.filter(q=>q.team===def()&&isBlockCell(q.r,q.c,p));
 }
 
 /* ---------- CPU（青チーム） ---------- */
@@ -342,14 +347,14 @@ function goalSide(r,ref){           // ref よりゴール側なら+1／同じ�
 }
 function atkCellScore(a,r,c){
   let s=-dist({r,c},goalPos())*3;
+  // シュートはエリア内からしか打てないので、エリアに入ることを重くみる
   if(c>=SA_C[0]&&c<=SA_C[1]&&r>=SA_R[0]&&r<=SA_R[1]) s+=12;
   // 自分のマーク相手（同じ背番号の守備）よりゴール側に出るのが基本
   const mark=S.pieces.find(q=>q.team===def()&&q.num===a.num);
   if(mark) s+=goalSide(r,mark)*GOAL_SIDE;
-  // 1行ゴール側に守備がいるマスはジャンケンで止められるので、なるべく避ける
-  if(S.pieces.some(q=>q.team===def()&&q.r===r+1&&Math.abs(q.c-c)<=1)) s-=4;
-  const near=S.pieces.filter(q=>q.team===def()&&dist(q,{r,c})<=1).length;
-  s-=near*2;
+  // ブロックされるマス（ゴール側3マス＋真横2マスに守備がいる）は、そのぶん減点
+  const blockers=S.pieces.filter(q=>q.team===def()&&isBlockCell(q.r,q.c,{r,c})).length;
+  s-=blockers*4;
   return s+Math.random()*0.6;   // 同点はランダムに散らす
 }
 function defCellScore(d,r,c){
@@ -359,7 +364,8 @@ function defCellScore(d,r,c){
   let s=-(dist({r,c},target)*2+dist({r,c},goalPos())*0.5);
   // ねらう相手よりゴール側に立つのが基本
   s+=goalSide(r,target)*GOAL_SIDE;
-  if(r===target.r+1&&Math.abs(c-target.c)<=1) s+=5;   // ちょうど1行ゴール側の正面ならさらに加点
+  // ブロックできる位置（ゴール側3マス＋真横2マス）に入れたら加点。ゴール側のほうを厚くみる
+  if(isBlockCell(r,c,target)) s += (r===target.r+1) ? 5 : 3;
   return s+Math.random()*0.4;
 }
 function isCPUTurn(){
@@ -398,6 +404,10 @@ function cpuAction(){
     say('あお：パスできる相手がいないので、なにもしない。');
     endAction(); return;
   }
+  if(!inSA(holder())){
+    say('あお：まだエリアの外なので打てない。なにもしない。');
+    endAction(); return;
+  }
   if(firstLap){
     say('あお：1周目はまだ様子見。なにもしない。');
     endAction(); return;
@@ -426,14 +436,16 @@ function afterDefMove(){
 
 function doShoot(){
   if(!S.passed){ say('パスを受けてからでないと打てません。'); return; }
-  const h=holder(); const n=adjDefenders(h).length;
+  const h=holder();
+  if(!inSA(h)){ say('エリアの外からは打てません。エリアの中まで運びましょう。'); return; }
+  const n=adjDefenders(h).length;
   if(n===0){ say('ノーマーク！ そのままシュート。'); resolveShot(h); return; }
-  say('となりに'+n+'人。ぜんいんにジャンケンで勝てば打てます。');
+  say('ブロックが'+n+'人（ゴール側3マス＋真横2マス）。ぜんいんにジャンケンで勝てば打てます。');
   janChain(h,n,1);
 }
 function janChain(h,total,i){
   janModal('ジャンケン！ （'+i+' / '+total+'人目）',
-    (total>1?'マークしている'+total+'人ぜんいんに勝たないと打てません。<br>':'')+(i)+'人目と勝負！',
+    (total>1?'ブロックしている'+total+'人ぜんいんに勝たないと打てません。<br>':'')+(i)+'人目と勝負！',
     ()=>{ // 勝ち
       say(i+'人目に勝った！');
       if(i<total){ janChain(h,total,i+1); }
@@ -444,7 +456,7 @@ function janChain(h,total,i){
     });
 }
 function resolveShot(h){
-  const pts = (inSA(h) && h.r>=4) ? 2 : 3;   // ゴール前3×3の近い2行だけ2点、それ以外はどこでも3点
+  const pts = (h.r>=4) ? 2 : 3;   // エリア内のゴールに近い2行が2点、エリア内の遠い1行が3点
   const team = S.atk;
   if(pts===2){
     diceModal('🏀 2点シュート！','サイコロで <b>3以下</b> なら成功（2分の1）。',
@@ -491,7 +503,7 @@ function ensureMovable(){
     }
     if(S.phase==='ACTION'){
       const canPass = passTargets().length>0;
-      const canShoot = !!S.passed;
+      const canShoot = !!S.passed && inSA(holder());   // シュートはエリア内からだけ
       if(!canPass && !canShoot){
         say('パスもシュートもできないので、自動的に次の番へ。');
         S.phase='DEF'; S.sel=null; continue;
@@ -545,8 +557,10 @@ function render(){
   const mv = STEP2 ? '●＝1歩　○＝2歩。ボールを持っている人は1歩だけ。' : 'みどりのマスをタップ。全員1歩だけ動けます。';
   const hints={ATK:mv,
                ACTION:S.passed
-                 ? 'パスを受けた'+holder().num+'番はそのまま打てます。'
-                 : 'パスを出せるのは、この手番で動いた選手だけ。シュートはパスを受けてから。',
+                 ? (inSA(holder())
+                     ? 'パスを受けた'+holder().num+'番はそのまま打てます。'
+                     : 'エリアの外なのでまだ打てません。色のついたエリアまで運びましょう。')
+                 : 'パスを出せるのは、この手番で動いた選手だけ。シュートはパスを受けたあと、エリアの中からだけ。',
                DEF:mv};
   document.getElementById('hint').textContent =
     isCPUTurn() ? '青（CPU）が考え中…' : (hints[S.phase]||'');
@@ -559,8 +573,8 @@ function render(){
     const cell=document.createElement('div');
     let cls='cell';
     const sa = c>=SA_C[0]&&c<=SA_C[1]&&r>=SA_R[0]&&r<=SA_R[1];
-    const twoPt = sa && r>=4;
-    cls += twoPt ? ' z2' : ' z3';   // 2点ゾーン以外はすべて3点ゾーン（エリアの外も3点で打てる）
+    // 色がついているマス＝シュートできるエリア内。ゴールに近い2行が2点、残り1行が3点。
+    if(sa) cls += (r>=4) ? ' z2' : ' z3';
     if(sa){
       const t=r===SA_R[1],b=r===SA_R[0],l=c===SA_C[0],ri=c===SA_C[1];
       if(t&&l)cls+=' sa-tl'; else if(t&&ri)cls+=' sa-tr';
@@ -597,7 +611,7 @@ function render(){
   document.getElementById('moveActs').style.display = (S.phase==='ACTION') ? 'none' : 'flex';
   const act=S.phase==='ACTION'&&!cpuTurn&&!S.gameOver;
   document.getElementById('btnPass').disabled = !act || passTargets().length===0;
-  document.getElementById('btnShoot').disabled = !act || !holder() || !S.passed;
+  document.getElementById('btnShoot').disabled = !act || !holder() || !S.passed || !inSA(holder());
   document.getElementById('btnSkip').disabled = !act;
   document.getElementById('btnStay').disabled = cpuTurn || S.phase==='ACTION';
   document.getElementById('btnPass').textContent = S.sel==='PASS'?'パス（やめる）':'パス';
@@ -616,8 +630,11 @@ function onCell(r,c){
     if(t&&passTargets().some(x=>x.id===t.id)){
       S.ball=t.id; S.sel=null; S.passed=true;
       const n=adjDefenders(t).length;
-      const willPts=(inSA(t)&&t.r>=4)?2:3;
-      say(t.num+'番へパス。'+(n===0?'ノーマークだ！ そのまま打てる（'+willPts+'点）。':'となりに'+n+'人。ぜんいんに勝てば打てる（'+willPts+'点）。'));
+      const willPts=(t.r>=4)?2:3;
+      say(t.num+'番へパス。'+(!inSA(t)
+            ? 'まだエリアの外なので、ここからは打てません。'
+            : (n===0?'ノーマークだ！ そのまま打てる（'+willPts+'点）。'
+                   : 'ブロックが'+n+'人。ぜんいんに勝てば打てる（'+willPts+'点）。')));
       render();
     }
     return;
