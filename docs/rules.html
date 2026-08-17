@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>マス目バスケ ルール（実ゲーム用）</title>
+<style>
+@page{ size:A4; margin:12mm 12mm 10mm; }
+*{box-sizing:border-box}
+body{
+  margin:0; color:#15181C; background:#fff;
+  font-family:"IPAPGothic","IPAGothic","Hiragino Kaku Gothic ProN",sans-serif;
+  font-size:9.4pt; line-height:1.55;
+}
+h1{
+  margin:0 0 2mm; font-size:16.5pt; letter-spacing:.04em;
+  background:#14243F; color:#fff; padding:2.6mm 4mm; border-radius:2.5mm;
+}
+h1 small{display:block;font-size:8pt;font-weight:400;color:#A9BBD6;letter-spacing:.12em;margin-top:1mm}
+h2{
+  font-size:11pt; margin:3.6mm 0 1.5mm; padding:1.1mm 2.4mm;
+  border-left:5px solid #C62A24; background:#F4F5F7; border-radius:0 2mm 2mm 0;
+}
+h3{font-size:9.4pt;margin:3mm 0 1mm;color:#14243F}
+p{margin:0 0 1.6mm}
+ul{margin:0 0 1.6mm;padding-left:4.4mm}
+li{margin-bottom:.7mm}
+.lead{font-size:9pt;color:#5A616B;margin-bottom:3mm}
+.cols{display:flex;gap:5mm;align-items:flex-start}
+.col{flex:1;min-width:0}
+.box{border:1px solid #D3D7DD;border-radius:2mm;padding:2mm 3mm;margin-bottom:2.2mm;background:#FBFBFC}
+.box.warn{border-color:#C62A24;background:#FCF3F2}
+.box.note{border-color:#1E8A4C;background:#F1F8F3}
+.box b{color:#14243F}
+table{width:100%;border-collapse:collapse;margin:0 0 2.4mm;font-size:9pt}
+th,td{border:1px solid #D3D7DD;padding:1mm 2mm;text-align:left}
+th{background:#14243F;color:#fff;font-weight:700}
+td.c,th.c{text-align:center}
+.flow{display:flex;align-items:center;gap:1.6mm;flex-wrap:wrap;font-size:8.6pt;margin-bottom:2.4mm}
+.flow span{background:#14243F;color:#fff;padding:1mm 2.2mm;border-radius:1.6mm;font-weight:700}
+.flow i{font-style:normal;color:#5A616B;font-weight:700}
+
+/* 盤面図 */
+.court{display:inline-block;border:1.6px solid #14243F;background:#fff}
+.row{display:flex}
+.cel{
+  width:9.8mm;height:9.8mm;border:.5px solid #D9C39C;background:#F2E3C8;
+  display:flex;align-items:center;justify-content:center;font-size:7pt;color:#8A7350;
+}
+.cel.z2{background:#D6B884}
+.cel.z3{background:#E9D5AC}
+.cel.sa{box-shadow:inset 0 0 0 1.4px #14243F}
+.cel.blk{background:#FFE1DF;box-shadow:inset 0 0 0 1.4px #C62A24}
+.cel.ball{background:#FFF6DA;box-shadow:inset 0 0 0 1.6px #E88A1A}
+.pl{width:7.2mm;height:7.2mm;border-radius:50%;color:#fff;font-weight:700;font-size:7.2pt;
+    display:flex;align-items:center;justify-content:center}
+.pl.r{background:#C62A24}.pl.b{background:#17549E}
+.goalbar{background:#14243F;color:#fff;font-size:6.6pt;letter-spacing:.16em;text-align:center;
+  padding:.7mm 0;width:9.8mm;margin:0 auto}
+.cap{font-size:8pt;color:#5A616B;margin:1.2mm 0 2.4mm;line-height:1.45}
+.legend{font-size:8.2pt;color:#5A616B;line-height:1.75}
+.key{display:inline-block;width:3.4mm;height:3.4mm;border:.5px solid #D9C39C;vertical-align:-.7mm;margin-right:1mm}
+.k2{background:#D6B884}.k3{background:#E9D5AC}.k0{background:#F2E3C8}.kb{background:#FFE1DF;border-color:#C62A24}
+.page{page-break-after:always}
+.foot{margin-top:3.5mm;border-top:1px solid #D3D7DD;padding-top:1.6mm;font-size:7.4pt;color:#9AA0A8;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="page">
+<h1>マス目バスケ ルール<small>3 ON 3／コートに引いた マス目で あそぶ バスケットボール</small></h1>
+
+<p class="lead">チェスのように「1人ずつ 順番に 1マス動く」バスケットボール。ボールは 走って運ばず、<b>パスを受けた人が エリアの中から シュート</b>します。勝敗は じゃんけんと サイコロで 決めます。</p>
+
+<div class="cols">
+<div class="col">
+
+<h2>1. 用意するもの</h2>
+<ul>
+  <li>コート … <b>5マス × 5マス</b>（1マス 1.5m ＝ 7.5m四方）。テープや ラインで マス目を引く</li>
+  <li>人 … 赤3人・青3人。ぜんいん <b>背番号 1・2・3</b> をつける</li>
+  <li>ボール 1つ ／ サイコロ 1つ ／ 得点を書く ホワイトボード</li>
+  <li>しんぱん 1人（順番と 手数を 読みあげる係）</li>
+</ul>
+
+<h2>2. コートと 得点</h2>
+<div style="text-align:center">
+  <div class="goalbar">ゴール</div>
+  <div class="court">
+    <div class="row"><div class="cel"></div><div class="cel z2 sa"></div><div class="cel z2 sa"></div><div class="cel z2 sa"></div><div class="cel"></div></div>
+    <div class="row"><div class="cel"></div><div class="cel z2 sa"></div><div class="cel z2 sa"></div><div class="cel z2 sa"></div><div class="cel"></div></div>
+    <div class="row"><div class="cel"></div><div class="cel z3 sa"></div><div class="cel z3 sa"></div><div class="cel z3 sa"></div><div class="cel"></div></div>
+    <div class="row"><div class="cel"><div class="pl b">1</div></div><div class="cel"></div><div class="cel"><div class="pl b">2</div></div><div class="cel"></div><div class="cel"><div class="pl b">3</div></div></div>
+    <div class="row"><div class="cel"><div class="pl r">1</div></div><div class="cel"></div><div class="cel"><div class="pl r">2</div></div><div class="cel"></div><div class="cel"><div class="pl r">3</div></div></div>
+  </div>
+</div>
+<p class="cap">▲ スタートの ならびかた（赤の 攻撃のとき）。ボールは 赤の2番が 持って はじめる。<br>
+守る チームは、せめる 人の <b>1マス ゴール側</b>に ならぶ。</p>
+
+<p class="legend">
+<span class="key k2"></span>2点ゾーン（ゴールに 近い 2行）<br>
+<span class="key k3"></span>3点ゾーン（エリアの 手前 1行）<br>
+<span class="key k0"></span>ここからは <b>シュートできない</b>
+</p>
+
+<div class="box warn"><b>だいじ：シュートは エリアの中からだけ。</b><br>
+色のついた 9マス（まん中3列 × ゴール側3行）が <b>シュートエリア</b>。ここに 入っていない人は シュートできません。</div>
+
+<h2>3. 試合の 進みかた</h2>
+<ul>
+  <li>攻撃は <b>ぜんぶで 6回</b>（赤3回・青3回）。おわった時点で 点が多い チームの 勝ち</li>
+  <li>攻守が 交代したら、<b>ぜんいん スタートの位置に もどる</b></li>
+  <li>両チームとも <b>同じゴール</b>を せめる（ハーフコート）</li>
+</ul>
+
+</div>
+<div class="col">
+
+<h2>4. 手番（じゅんばん）</h2>
+<div class="flow">
+  <span>① 攻撃の1番が動く</span><i>→</i><span>② パス/シュート/なにもしない</span><i>→</i><span>③ 守備の1番が動く</span>
+</div>
+<p>そのあと 2番、3番、また1番…と くりかえします。<b>自分の 番でない人は 動けません。</b></p>
+
+<h2>5. 動きかた</h2>
+<ul>
+  <li>タテ・ヨコ・ナナメの <b>となり1マス</b>へ 動く</li>
+  <li><b>人が いるマスには 入れない</b>（通りぬけも できない）</li>
+  <li>「その場に とどまる」も えらべる（手数は 1つ すすむ）</li>
+  <li>動けるマスが ないときは、その番は とばす</li>
+</ul>
+<div class="box note"><b>やさしくする ときは：</b> ボールを 持っていない人だけ「2マスまで」動ける ルールにしても よい。ボールを 持っている人は いつも 1マス。</div>
+
+<h2>6. パス</h2>
+<ul>
+  <li>パスを 出せる 相手は、<b>その手番で 動いた 選手 ただ1人</b></li>
+  <li>タテ・ヨコ・ナナメの まっすぐな線 の上だけ。きょりは 何マスでも よい</li>
+  <li>線の とちゅうに <b>相手チームの人が いたら カット</b>（味方は じゃまに ならない）</li>
+  <li>動いた 本人が ボールを 持っているときは、パスは 出せない</li>
+</ul>
+
+<h2>7. シュート</h2>
+<div class="box"><b>打てるのは この2つが そろったとき</b>
+<ul style="margin-top:1mm">
+  <li>その手番で <b>パスを 受けた</b> 選手であること</li>
+  <li>その選手が <b>シュートエリアの中</b>に いること</li>
+</ul>
+</div>
+<p>ボールを 持ったまま 動いただけでは 打てません。かならず <b>「動く → パス → シュート」</b>の 形を つくります。</p>
+
+<table>
+  <tr><th>シュートの ばしょ</th><th class="c">点数</th><th class="c">成功する 目</th></tr>
+  <tr><td>ゴールに 近い 2行（こい色）</td><td class="c">2点</td><td class="c">サイコロ <b>1・2・3</b></td></tr>
+  <tr><td>エリアの 手前 1行（うすい色）</td><td class="c">3点</td><td class="c">サイコロ <b>6</b></td></tr>
+</table>
+
+</div>
+</div>
+
+<div class="foot">マス目バスケ ルール（実ゲーム用）／ 3on3 ・ 1ページ目</div>
+</div>
+
+<!-- ===== 2ページ目 ===== -->
+<h1>マス目バスケ ルール<small>ブロック ・ リバウンド ・ こうたい ・ 5 ON 5</small></h1>
+
+<div class="cols">
+<div class="col">
+
+<h2>8. ブロック（じゃんけん）</h2>
+<p>シュートする人の まわりに いる 守備は、<b>ゴール側の 3マス</b> と <b>真横の 2マス</b>、あわせて <b>5マス</b>だけ ブロックできます。</p>
+
+<div style="text-align:center">
+  <div class="goalbar">ゴール</div>
+  <div class="court">
+    <div class="row"><div class="cel"></div><div class="cel blk"></div><div class="cel blk"></div><div class="cel blk"></div><div class="cel"></div></div>
+    <div class="row"><div class="cel"></div><div class="cel blk"></div><div class="cel ball"><div class="pl r">2</div></div><div class="cel blk"></div><div class="cel"></div></div>
+    <div class="row"><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div></div>
+  </div>
+</div>
+<p class="cap">▲ 赤の <span style="color:#E88A1A">■</span> が シュートする人。<span style="color:#C62A24">■</span> の 5マスに いる 守備が ブロックできる。<br>
+<b>うしろ・ななめ うしろの 守備は 数えません。</b></p>
+
+<ul>
+  <li>ブロックできる 守備が <b>0人</b> … そのまま サイコロへ</li>
+  <li>ブロックできる 守備が <b>n人</b> … <b>1人ずつ 順に じゃんけん</b>。ぜんいんに 勝てたら サイコロへ</li>
+  <li>1人でも <b>負けたら ブロック成立</b> → 相手ボールで 攻守交代</li>
+</ul>
+<div class="box warn"><b>真横も ブロックになりました。</b>すぐ となりに 守備が いるのに フリーで 打てる、ということは ありません。守る人は「相手の 1マス ゴール側」に 入るのが 基本です。</div>
+
+<h2>9. リバウンド</h2>
+<p>サイコロで 外れたら リバウンドです。</p>
+<ul>
+  <li><b>ゴールに いちばん近い 攻撃1人</b> と <b>守備1人</b> で じゃんけん</li>
+  <li>攻撃の 勝ち … ゴールに いちばん近い 攻撃の人が ボールを 取り、そのまま つづけられる</li>
+  <li>守備の 勝ち … 相手ボールで 攻守交代</li>
+</ul>
+
+</div>
+<div class="col">
+
+<h2>10. 手数ぎれ（ショットクロック）</h2>
+<p>攻撃側が <b>9回 動いても</b> シュートを 打たなかったら、相手ボールに なります（背番号 3周ぶん）。しんぱんが 「あと○手」と 読みあげます。</p>
+<table>
+  <tr><th>人数</th><th class="c">コート</th><th class="c">手数</th></tr>
+  <tr><td>3 on 3</td><td class="c">5 × 5マス</td><td class="c">9手</td></tr>
+  <tr><td>5 on 5</td><td class="c">7 × 5マス</td><td class="c">15手</td></tr>
+</table>
+
+<h2>11. 攻守が 交代する とき</h2>
+<ul>
+  <li>シュートが 決まった</li>
+  <li>ブロックの じゃんけんに 負けた</li>
+  <li>リバウンドの じゃんけんに 負けた</li>
+  <li>手数ぎれ（9手）</li>
+</ul>
+<p>どの ばあいも、<b>ぜんいん スタートの位置に もどってから</b> 次の 攻撃を はじめます。</p>
+
+<h2>12. 5 on 5 で やるとき</h2>
+<ul>
+  <li>コートは <b>7マス × 5マス</b>（10.5m × 7.5m）</li>
+  <li>シュートエリアは まん中3列 × ゴール側3行（左右の 位置が ずれるだけで 広さは 同じ）</li>
+  <li>手数は <b>15手</b></li>
+  <li>ならびかた … まん中の 3番が トップで ボールを持ち、のこりは 左右に ひらく</li>
+</ul>
+
+<h2>13. しんぱんの チェックリスト</h2>
+<div class="box">
+<ul style="margin:0">
+  <li>いま だれの 番か（チーム・背番号）を 声に出す</li>
+  <li>動いた人を おぼえる → <b>その人だけが パスを 受けられる</b></li>
+  <li>シュート前に「<b>エリアの中か</b>」「<b>ブロックは 何人か</b>」を 確認する</li>
+  <li>攻撃が 動いた回数を 数える（9手／15手）</li>
+  <li>じゃんけん・サイコロの けっかを 大きな声で つたえる</li>
+</ul>
+</div>
+
+<div class="box note"><b>まよったら</b><br>
+このルールは Webアプリ版と 同じです。判定に まよったら、スマホの アプリ版で 同じ 場面を つくって 確かめてください。</div>
+
+</div>
+</div>
+
+<div class="foot">マス目バスケ ルール（実ゲーム用）／ 3on3 ・ 2ページ目 ／ 2026年8月17日版</div>
+
+</body>
+</html>
