@@ -199,7 +199,7 @@ button:active{transform:translateY(1px)}
     <button class="ghost" id="btnReset">最初から</button>
   </div>
 
-  <div class="updated">修正日時：2026年8月17日</div>
+  <div class="updated">修正日時：2026年8月17日 15:32（JST）</div>
 </div>
 
 <div class="mask" id="mask"><div class="modal">
@@ -334,9 +334,20 @@ function adjDefenders(p){
 let cpuBlue=true, cpuScheduled=false;
 const dist=(a,b)=>Math.max(Math.abs(a.r-b.r),Math.abs(a.c-b.c));
 function goalPos(){ return {r:ROWS+1,c:Math.ceil(COLS/2)}; }
-function atkCellScore(r,c){
+// CPUの基本方針：相手プレイヤーよりゴール側（＝rが大きいほう）のマスへ入る。
+// 守備なら相手の前に立ちふさがり、攻撃なら守備を抜き去る形になる。
+const GOAL_SIDE=10;                 // ゴール側かどうかを最優先にするための重み
+function goalSide(r,ref){           // ref よりゴール側なら+1／同じ行なら0／手前なら-1
+  return r>ref.r ? 1 : (r===ref.r ? 0 : -1);
+}
+function atkCellScore(a,r,c){
   let s=-dist({r,c},goalPos())*3;
   if(c>=SA_C[0]&&c<=SA_C[1]&&r>=SA_R[0]&&r<=SA_R[1]) s+=12;
+  // 自分のマーク相手（同じ背番号の守備）よりゴール側に出るのが基本
+  const mark=S.pieces.find(q=>q.team===def()&&q.num===a.num);
+  if(mark) s+=goalSide(r,mark)*GOAL_SIDE;
+  // 1行ゴール側に守備がいるマスはジャンケンで止められるので、なるべく避ける
+  if(S.pieces.some(q=>q.team===def()&&q.r===r+1&&Math.abs(q.c-c)<=1)) s-=4;
   const near=S.pieces.filter(q=>q.team===def()&&dist(q,{r,c})<=1).length;
   s-=near*2;
   return s+Math.random()*0.6;   // 同点はランダムに散らす
@@ -346,7 +357,9 @@ function defCellScore(d,r,c){
   const mark=S.pieces.find(p=>p.team===S.atk&&p.num===d.num);
   const target=(dist(d,bh)<=2)?bh:mark;
   let s=-(dist({r,c},target)*2+dist({r,c},goalPos())*0.5);
-  if(target===bh && r===bh.r+1 && Math.abs(c-bh.c)<=1) s+=5;   // ボール保持者のゴール側に入れたら加点
+  // ねらう相手よりゴール側に立つのが基本
+  s+=goalSide(r,target)*GOAL_SIDE;
+  if(r===target.r+1&&Math.abs(c-target.c)<=1) s+=5;   // ちょうど1行ゴール側の正面ならさらに加点
   return s+Math.random()*0.4;
 }
 function isCPUTurn(){
@@ -363,7 +376,7 @@ function cpuMove(){
   if(!mover) return;
   const cand=legalMoves(mover).map(o=>({r:o.r,c:o.c}));
   cand.push({r:mover.r,c:mover.c});   // その場にとどまる、もCPUの選択肢
-  const scoreFn=isAtk?(c)=>atkCellScore(c.r,c.c):(c)=>defCellScore(mover,c.r,c.c);
+  const scoreFn=isAtk?(c)=>atkCellScore(mover,c.r,c.c):(c)=>defCellScore(mover,c.r,c.c);
   let best=cand[0], bs=scoreFn(best);
   for(const cd of cand){ const s=scoreFn(cd); if(s>bs){bs=s;best=cd;} }
   const stayed=(best.r===mover.r&&best.c===mover.c);
